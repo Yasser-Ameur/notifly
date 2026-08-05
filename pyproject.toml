@@ -36,12 +36,17 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "aiosqlite>=0.21.0",
+    "fakeredis>=2.24.0",
+    "lupa>=2.1.0",
     "mypy>=1.14.0",
     "pytest>=8.3.0",
     "pytest-asyncio>=0.25.0",
     "pytest-cov>=6.0.0",
     "ruff>=0.9.0",
 ]
+
+[project.scripts]
+notifly-worker = "notifly.presentation.workers.worker:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -79,7 +84,7 @@ module = ["alembic.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["arq.*", "aiosmtplib.*", "pythonjsonlogger.*"]
+module = ["arq.*", "aiosmtplib.*", "pythonjsonlogger.*", "fakeredis.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
