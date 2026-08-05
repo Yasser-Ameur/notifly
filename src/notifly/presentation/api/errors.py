@@ -106,7 +106,30 @@ def validation_error_handler(request: Request, exc: RequestValidationError) -> J
 
 
 def pydantic_validation_error_handler(request: Request, exc: ValidationError) -> JSONResponse:
-    return _validation_error_response(request, exc.errors())
+    """Map a raw ``ValidationError`` to 500.
+
+    Request-body errors arrive as ``RequestValidationError`` and are handled by
+    ``validation_error_handler``. A bare ``ValidationError`` escaping to the
+    response path means server-side model construction failed, which is a bug
+    rather than a client mistake.
+    """
+    logger.exception(
+        "Pydantic validation failed while processing %s %s",
+        request.method,
+        request.url.path,
+        exc_info=exc,
+    )
+    return _json_response(
+        request,
+        status_code=500,
+        content=_error_body(
+            request,
+            code="internal_error",
+            title="Internal Server Error",
+            status=500,
+            detail="An unexpected error occurred.",
+        ),
+    )
 
 
 def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:

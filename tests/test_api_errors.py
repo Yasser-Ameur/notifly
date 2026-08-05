@@ -82,11 +82,10 @@ def test_pydantic_validation_error_handler() -> None:
     with pytest.raises(ValidationError) as exc_info:
         ApplicationCreate(name="")
     response = pydantic_validation_error_handler(_request(), exc_info.value)
-    assert response.status_code == 400
+    assert response.status_code == 500
     body = _body(response)
-    assert body["errors"] == [
-        {"field": "name", "message": "String should have at least 1 character"}
-    ]
+    assert body["type"] == "https://notifly.dev/errors/internal_error"
+    assert body["detail"] == "An unexpected error occurred."
 
 
 def test_validation_error_items_skips_non_dicts() -> None:

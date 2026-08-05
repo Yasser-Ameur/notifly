@@ -3,9 +3,14 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from notifly.domain.enums import ChannelType, VariableType
+
+_VARIABLE_NAME_PATTERN = r"^[A-Za-z_][A-Za-z0-9_]*$"
 
 
 class ApplicationCreate(BaseModel):
@@ -56,3 +61,47 @@ class NotFoundResponse(BaseModel):
     status: int
     detail: str
     correlation_id: str
+
+
+class VariableDefInput(BaseModel):
+    name: str = Field(pattern=_VARIABLE_NAME_PATTERN, min_length=1, max_length=120)
+    type: VariableType = VariableType.STRING
+    required: bool = True
+    default: Any = None
+
+
+class TemplateChannelContentInput(BaseModel):
+    subject: str | None = Field(default=None, max_length=1000)
+    body: str = Field(min_length=1)
+
+
+class TemplateChannelContentResponse(BaseModel):
+    subject: str | None
+    body: str
+
+
+class TemplateUpsert(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    event: str = Field(min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=1000)
+    variables: list[VariableDefInput] = Field(default_factory=list)
+    channels: dict[ChannelType, TemplateChannelContentInput]
+
+
+class TemplateResponse(BaseModel):
+    id: UUID
+    name: str
+    event: str
+    description: str | None
+    variables: list[VariableDefInput]
+    channels: dict[ChannelType, TemplateChannelContentResponse]
+    created_at: datetime
+    updated_at: datetime
+
+
+class TemplatePreviewRequest(BaseModel):
+    variables: dict[str, Any] = Field(default_factory=dict)
+
+
+class TemplatePreviewResponse(BaseModel):
+    channels: dict[ChannelType, TemplateChannelContentResponse]
