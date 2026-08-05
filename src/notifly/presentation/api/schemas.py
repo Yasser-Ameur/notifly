@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from notifly.domain.enums import (
+    AuditAction,
     ChannelType,
     DeliveryStatus,
     NotificationStatus,
@@ -121,6 +122,8 @@ class NotificationCreateRequest(BaseModel):
 
 
 class NotificationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     template_id: UUID | None
     event: str
@@ -133,7 +136,10 @@ class NotificationResponse(BaseModel):
 
 
 class DeliveryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
+    notification_id: UUID
     channel_type: ChannelType
     provider: str
     recipient: str
@@ -151,3 +157,23 @@ class DeliveryResponse(BaseModel):
 class NotificationDetailResponse(BaseModel):
     notification: NotificationResponse
     deliveries: list[DeliveryResponse]
+
+
+class OpsPageResponse[T](BaseModel):
+    items: list[T]
+    total: int
+    limit: int
+    offset: int
+
+
+class AuditEntryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    actor: str
+    action: AuditAction
+    resource_type: str
+    resource_id: UUID | None
+    correlation_id: str
+    payload: dict[str, Any]
+    created_at: datetime

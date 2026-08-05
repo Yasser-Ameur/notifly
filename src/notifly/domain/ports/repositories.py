@@ -135,6 +135,15 @@ class DeliveryRepository(Protocol):
         offset: int = 0,
     ) -> list[Delivery]: ...
 
+    async def count(
+        self,
+        *,
+        application_id: UUID,
+        notification_id: UUID | None = None,
+        channel_type: ChannelType | None = None,
+        status: DeliveryStatus | None = None,
+    ) -> int: ...
+
     async def update(self, delivery: Delivery) -> None: ...
 
 
@@ -148,6 +157,8 @@ class AuditRepository(Protocol):
     async def search(
         self, *, application_id: UUID, limit: int, offset: int
     ) -> list[AuditLogEntry]: ...
+
+    async def count(self, *, application_id: UUID) -> int: ...
 
 
 class OutboxRepository(Protocol):

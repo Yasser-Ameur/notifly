@@ -574,6 +574,30 @@ class SqlAlchemyDeliveryRepository:
         )
         return [_delivery_from_row(row) for row in result]
 
+    async def count(
+        self,
+        *,
+        application_id: UUID,
+        notification_id: UUID | None = None,
+        channel_type: ChannelType | None = None,
+        status: DeliveryStatus | None = None,
+    ) -> int:
+        stmt = (
+            select(func.count(orm.DeliveryRow.id))
+            .join(
+                orm.NotificationRow,
+                orm.DeliveryRow.notification_id == orm.NotificationRow.id,
+            )
+            .where(orm.NotificationRow.application_id == application_id)
+        )
+        if notification_id is not None:
+            stmt = stmt.where(orm.DeliveryRow.notification_id == notification_id)
+        if channel_type is not None:
+            stmt = stmt.where(orm.DeliveryRow.channel_type == channel_type.value)
+        if status is not None:
+            stmt = stmt.where(orm.DeliveryRow.status == status.value)
+        return int(await self._session.scalar(stmt) or 0)
+
     async def update(self, delivery: Delivery) -> None:
         row = await self._session.get(orm.DeliveryRow, delivery.id)
         if row is None:
@@ -611,6 +635,12 @@ class SqlAlchemyAuditRepository:
             .offset(offset)
         )
         return [_audit_from_row(row) for row in result]
+
+    async def count(self, *, application_id: UUID) -> int:
+        stmt = select(func.count(orm.AuditLogRow.id)).where(
+            orm.AuditLogRow.application_id == application_id
+        )
+        return int(await self._session.scalar(stmt) or 0)
 
 
 class SqlAlchemyOutboxRepository:

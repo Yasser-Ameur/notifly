@@ -65,3 +65,13 @@ class DispatchSummary:
     notification_id: UUID
     dispatched: int = 0
     skipped: bool = False
+
+
+@dataclass(frozen=True)
+class OpsPage[T]:
+    """A page of operations query results plus the total match count."""
+
+    items: list[T]
+    total: int
+    limit: int
+    offset: int

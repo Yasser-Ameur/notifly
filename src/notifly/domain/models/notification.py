@@ -70,6 +70,8 @@ class Delivery(DomainModel):
         self.attempts = 0
         self.next_attempt_at = now
         self.last_error = None
+        self.provider_message_id = None
+        self.completed_at = None
 
     def _next_attempt(self, now: datetime) -> datetime:
         delay = self.retry_backoff_seconds * (2 ** max(self.attempts - 1, 0))

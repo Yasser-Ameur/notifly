@@ -24,6 +24,7 @@ router = APIRouter(prefix="/v1/notifications", tags=["notifications"])
 def _delivery_response(delivery: Delivery) -> DeliveryResponse:
     return DeliveryResponse(
         id=delivery.id,
+        notification_id=delivery.notification_id,
         channel_type=delivery.channel_type,
         provider=delivery.provider,
         recipient=delivery.recipient,

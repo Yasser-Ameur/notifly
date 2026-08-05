@@ -23,7 +23,7 @@ from notifly.presentation.api.errors import (
     validation_error_handler,
 )
 from notifly.presentation.api.middleware import CorrelationIdMiddleware
-from notifly.presentation.api.routers import apps, health, notifications, templates
+from notifly.presentation.api.routers import apps, health, notifications, operations, templates
 
 
 def _register_exception_handlers(app: FastAPI) -> None:
@@ -65,6 +65,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(apps.router)
     app.include_router(templates.router)
     app.include_router(notifications.router)
+    app.include_router(operations.router)
     return app
 
 
