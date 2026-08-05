@@ -91,6 +91,7 @@ filterwarnings = ["error"]
 [tool.coverage.run]
 source = ["notifly"]
 branch = true
+concurrency = ["thread", "greenlet"]
 
 [tool.coverage.report]
 fail_under = 95
@@ -100,4 +101,8 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "if __name__ == .__main__.:",
     "raise NotImplementedError",
+    "^import .*",
+    "^from .*",
+    "^\\.\\.\\.$",
+    ": \\.\\.\\.$",
 ]
