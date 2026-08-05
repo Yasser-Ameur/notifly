@@ -52,3 +52,16 @@ class NotificationCreated:
     notification: Notification
     deliveries: list[Delivery]
     replayed: bool = False
+
+
+@dataclass(frozen=True)
+class DispatchSummary:
+    """Result of a worker dispatch run for a single notification.
+
+    ``skipped`` is True when the notification is missing or cancelled; the
+    dispatcher leaves it untouched and performs no work.
+    """
+
+    notification_id: UUID
+    dispatched: int = 0
+    skipped: bool = False

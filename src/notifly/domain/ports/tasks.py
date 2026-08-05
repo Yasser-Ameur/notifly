@@ -10,3 +10,13 @@ class TaskDispatcher(Protocol):
     the dispatcher is only a transport."""
 
     async def enqueue(self, task: str, payload: dict[str, Any]) -> None: ...
+
+
+class InMemoryTaskDispatcher:
+    """Records enqueued jobs in memory. For tests and single-process runs."""
+
+    def __init__(self) -> None:
+        self.jobs: list[tuple[str, dict[str, Any]]] = []
+
+    async def enqueue(self, task: str, payload: dict[str, Any]) -> None:
+        self.jobs.append((task, payload))
