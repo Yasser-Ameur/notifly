@@ -14,6 +14,7 @@ from notifly import __version__
 from notifly.config import Settings, get_settings
 from notifly.domain.errors import NotiFlyError
 from notifly.infrastructure.db.session import create_engine, create_session_factory
+from notifly.infrastructure.observability.metrics import PrometheusMetrics
 from notifly.logging import configure_logging
 from notifly.presentation.api.errors import (
     http_exception_handler,
@@ -22,7 +23,7 @@ from notifly.presentation.api.errors import (
     unhandled_exception_handler,
     validation_error_handler,
 )
-from notifly.presentation.api.middleware import CorrelationIdMiddleware
+from notifly.presentation.api.middleware import CorrelationIdMiddleware, MetricsMiddleware
 from notifly.presentation.api.routers import apps, health, notifications, operations, templates
 
 
@@ -59,7 +60,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         redoc_url="/redoc",
         openapi_url="/openapi.json",
     )
+    app.state.metrics = PrometheusMetrics()
     app.add_middleware(CorrelationIdMiddleware)
+    app.add_middleware(MetricsMiddleware)
     _register_exception_handlers(app)
     app.include_router(health.router)
     app.include_router(apps.router)

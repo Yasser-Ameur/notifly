@@ -18,6 +18,7 @@ from uuid import uuid4
 from notifly.domain.enums import NotificationStatus, OutboxEventType
 from notifly.domain.models.outbox import OutboxEvent
 from notifly.domain.ports.clock import Clock, SystemClock
+from notifly.domain.ports.metrics import Metrics, NoopMetrics
 from notifly.domain.ports.repositories import UnitOfWorkFactory
 from notifly.domain.ports.tasks import TaskDispatcher
 
@@ -35,10 +36,12 @@ class OutboxPublisher:
         task_dispatcher: TaskDispatcher,
         *,
         clock: Clock | None = None,
+        metrics: Metrics | None = None,
     ) -> None:
         self._uow_factory = uow_factory
         self._task_dispatcher = task_dispatcher
         self._clock = clock or SystemClock()
+        self._metrics = metrics or NoopMetrics()
 
     async def publish_pending(self, *, limit: int = 100) -> int:
         """Enqueue every pending outbox event and mark it published or failed."""
@@ -57,8 +60,10 @@ class OutboxPublisher:
                         exc,
                     )
                     await uow.outbox.mark_failed(event.id, str(exc))
+                    self._metrics.outbox_failed(event_type=event.event_type.value)
                 else:
                     await uow.outbox.mark_published(event.id, now)
+                    self._metrics.outbox_published(event_type=event.event_type.value)
                     published += 1
         return published
 

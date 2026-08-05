@@ -34,6 +34,7 @@ from notifly.domain.models.notification import Delivery, Notification
 from notifly.domain.models.outbox import OutboxEvent
 from notifly.domain.models.template import Template
 from notifly.domain.ports.clock import Clock, SystemClock
+from notifly.domain.ports.metrics import Metrics, NoopMetrics
 from notifly.domain.ports.repositories import UnitOfWork, UnitOfWorkFactory
 from notifly.domain.providers import ProviderRegistry
 from notifly.logging import get_correlation_id
@@ -61,10 +62,12 @@ class NotificationService:
         *,
         clock: Clock | None = None,
         registry: ProviderRegistry | None = None,
+        metrics: Metrics | None = None,
     ) -> None:
         self._uow_factory = uow_factory
         self._clock = clock or SystemClock()
         self._registry = registry
+        self._metrics = metrics or NoopMetrics()
 
     async def create_notification(
         self,
@@ -174,6 +177,7 @@ class NotificationService:
                         created_at=now,
                     )
                 )
+        self._metrics.notification_created(scheduled=scheduled_at is not None)
         return NotificationCreated(notification=notification, deliveries=deliveries)
 
     async def get_notification(

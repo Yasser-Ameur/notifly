@@ -47,7 +47,10 @@ def get_template_service(request: Request) -> TemplateService:
 
 
 def get_notification_service(request: Request) -> NotificationService:
-    return NotificationService(get_unit_of_work_factory(request))
+    return NotificationService(
+        get_unit_of_work_factory(request),
+        metrics=getattr(request.app.state, "metrics", None),
+    )
 
 
 def get_operations_service(request: Request) -> OperationsService:

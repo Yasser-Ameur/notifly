@@ -30,6 +30,7 @@ from notifly.domain.enums import (
 from notifly.domain.errors import ProviderConfigurationError
 from notifly.domain.models.notification import Delivery, DeliveryAttempt, Notification
 from notifly.domain.ports.clock import Clock, SystemClock
+from notifly.domain.ports.metrics import Metrics, NoopMetrics
 from notifly.domain.ports.rate_limit import RateLimiter
 from notifly.domain.ports.repositories import UnitOfWork, UnitOfWorkFactory
 from notifly.domain.providers import ProviderMessage, ProviderRegistry
@@ -47,11 +48,13 @@ class DispatcherService:
         registry: ProviderRegistry,
         rate_limiter: RateLimiter | None = None,
         clock: Clock | None = None,
+        metrics: Metrics | None = None,
     ) -> None:
         self._uow_factory = uow_factory
         self._registry = registry
         self._rate_limiter = rate_limiter
         self._clock = clock or SystemClock()
+        self._metrics = metrics or NoopMetrics()
 
     async def dispatch_notification(self, notification_id: UUID) -> DispatchSummary:
         """Dispatch every pending, due delivery of ``notification_id``."""
@@ -145,6 +148,12 @@ class DispatcherService:
             await self._record_attempt(
                 uow, delivery, attempt_number, AttemptStatus.SUCCESS, None, duration_ms, now
             )
+            self._metrics.delivery_attempt(
+                channel=delivery.channel_type, outcome=DeliveryStatus.SENT
+            )
+            self._metrics.delivery_duration(
+                channel=delivery.channel_type, seconds=duration_ms / 1000.0
+            )
             await write_audit(
                 uow,
                 application_id=notification.application_id,
@@ -196,6 +205,11 @@ class DispatcherService:
         await self._record_attempt(
             uow, delivery, attempt_number, AttemptStatus.FAILED, error, duration_ms, now
         )
+        self._metrics.delivery_attempt(channel=delivery.channel_type, outcome=DeliveryStatus.FAILED)
+        if duration_ms is not None:
+            self._metrics.delivery_duration(
+                channel=delivery.channel_type, seconds=duration_ms / 1000.0
+            )
         await write_audit(
             uow,
             application_id=notification.application_id,
@@ -229,6 +243,7 @@ class DispatcherService:
         )
         if allowed:
             return True
+        self._metrics.delivery_deferred(channel=delivery.channel_type)
         delivery.next_attempt_at = now + timedelta(seconds=delivery.retry_backoff_seconds)
         delivery.updated_at = now
         await uow.deliveries.update(delivery)
