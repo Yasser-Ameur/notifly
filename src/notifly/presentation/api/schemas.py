@@ -8,7 +8,12 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from notifly.domain.enums import ChannelType, VariableType
+from notifly.domain.enums import (
+    ChannelType,
+    DeliveryStatus,
+    NotificationStatus,
+    VariableType,
+)
 
 _VARIABLE_NAME_PATTERN = r"^[A-Za-z_][A-Za-z0-9_]*$"
 
@@ -105,3 +110,44 @@ class TemplatePreviewRequest(BaseModel):
 
 class TemplatePreviewResponse(BaseModel):
     channels: dict[ChannelType, TemplateChannelContentResponse]
+
+
+class NotificationCreateRequest(BaseModel):
+    template_id: UUID | None = None
+    event: str = Field(min_length=1, max_length=200)
+    variables: dict[str, Any] = Field(default_factory=dict)
+    recipients: dict[ChannelType, str]
+    scheduled_at: datetime | None = None
+
+
+class NotificationResponse(BaseModel):
+    id: UUID
+    template_id: UUID | None
+    event: str
+    variables: dict[str, Any]
+    status: NotificationStatus
+    scheduled_at: datetime | None
+    correlation_id: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class DeliveryResponse(BaseModel):
+    id: UUID
+    channel_type: ChannelType
+    provider: str
+    recipient: str
+    subject: str | None
+    body: str
+    status: DeliveryStatus
+    attempts: int
+    next_attempt_at: datetime | None
+    last_error: str | None
+    provider_message_id: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class NotificationDetailResponse(BaseModel):
+    notification: NotificationResponse
+    deliveries: list[DeliveryResponse]

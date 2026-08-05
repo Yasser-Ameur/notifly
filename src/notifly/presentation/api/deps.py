@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from notifly.application.dto import AuthenticatedContext
 from notifly.application.services.applications import ApplicationService
+from notifly.application.services.notifications import NotificationService
 from notifly.application.services.templates import TemplateService
 from notifly.domain.ports.repositories import UnitOfWorkFactory
 from notifly.infrastructure.db.uow import SqlAlchemyUnitOfWork
@@ -44,6 +45,10 @@ def get_template_service(request: Request) -> TemplateService:
     return TemplateService(get_unit_of_work_factory(request))
 
 
+def get_notification_service(request: Request) -> NotificationService:
+    return NotificationService(get_unit_of_work_factory(request))
+
+
 async def get_current_application(
     request: Request,
     x_notifly_key: Annotated[str | None, Header(alias="X-Notifly-Key")] = None,
@@ -56,4 +61,5 @@ async def get_current_application(
 DbSession = Annotated[AsyncSession, Depends(get_session)]
 AppService = Annotated[ApplicationService, Depends(get_application_service)]
 TemplateServiceDep = Annotated[TemplateService, Depends(get_template_service)]
+NotificationServiceDep = Annotated[NotificationService, Depends(get_notification_service)]
 CurrentApp = Annotated[AuthenticatedContext, Depends(get_current_application)]

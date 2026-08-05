@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from notifly.domain.models.application import ApiKey, Application
+from notifly.domain.models.notification import Delivery, Notification
 
 
 @dataclass(frozen=True)
@@ -38,3 +39,16 @@ class AuthenticatedContext:
     @property
     def actor(self) -> str:
         return self.api_key.key_prefix
+
+
+@dataclass(frozen=True)
+class NotificationCreated:
+    """Result of the Notification Engine: the notification plus its plan.
+
+    ``replayed`` is True when an ``Idempotency-Key`` matched an earlier request
+    and the engine returned the existing notification instead of a new one.
+    """
+
+    notification: Notification
+    deliveries: list[Delivery]
+    replayed: bool = False
