@@ -21,8 +21,12 @@ def test_settings(tmp_path) -> Settings:
 
 @pytest.fixture()
 async def app(test_settings) -> AsyncIterator:
+    from notifly.infrastructure.db.base import Base
+
     application = create_app(test_settings)
     async with application.router.lifespan_context(application):
+        async with application.state.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
         yield application
 
 
@@ -30,6 +34,6 @@ async def app(test_settings) -> AsyncIterator:
 async def client(app) -> AsyncIterator:
     from httpx import ASGITransport, AsyncClient
 
-    transport = ASGITransport(app=app)
+    transport = ASGITransport(app=app, raise_app_exceptions=False)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac

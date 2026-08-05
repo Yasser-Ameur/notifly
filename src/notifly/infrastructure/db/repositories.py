@@ -289,6 +289,14 @@ class SqlAlchemyApiKeyRepository:
         )
         return _key_from_row(result) if result else None
 
+    async def get_by_prefix(self, key_prefix: str) -> list[ApiKey]:
+        result = await self._session.scalars(
+            select(orm.ApiKeyRow)
+            .where(orm.ApiKeyRow.key_prefix == key_prefix)
+            .order_by(orm.ApiKeyRow.created_at)
+        )
+        return [_key_from_row(row) for row in result]
+
     async def list_by_app(self, application_id: UUID) -> list[ApiKey]:
         result = await self._session.scalars(
             select(orm.ApiKeyRow)

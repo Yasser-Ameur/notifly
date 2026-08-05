@@ -40,13 +40,14 @@ class ApplicationRow(Base):
 
 class ApiKeyRow(Base):
     __tablename__ = "api_keys"
+    __table_args__ = (Index("ix_api_keys_prefix", "key_prefix"),)
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     application_id: Mapped[UUID] = mapped_column(
         Uuid, ForeignKey("applications.id", ondelete="CASCADE"), index=True
     )
     name: Mapped[str] = mapped_column(String(120))
-    key_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    key_hash: Mapped[str] = mapped_column(Text, unique=True)
     key_prefix: Mapped[str] = mapped_column(String(32))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

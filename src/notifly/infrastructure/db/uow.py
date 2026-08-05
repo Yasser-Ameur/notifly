@@ -38,6 +38,16 @@ class SqlAlchemyUnitOfWork:
     async def close(self) -> None:
         await self._session.close()
 
+    async def __aenter__(self) -> UnitOfWork:
+        return self
+
+    async def __aexit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
+        if exc_type is None:
+            await self.commit()
+        else:
+            await self.rollback()
+        await self.close()
+
 
 def create_uow_factory(session_factory: async_sessionmaker[AsyncSession]) -> UnitOfWorkFactory:
     """Build a UnitOfWorkFactory bound to an ``async_sessionmaker``."""

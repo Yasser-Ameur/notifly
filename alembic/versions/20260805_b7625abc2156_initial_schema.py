@@ -46,7 +46,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('application_id', sa.Uuid(), nullable=False),
     sa.Column('name', sa.String(length=120), nullable=False),
-    sa.Column('key_hash', sa.String(length=64), nullable=False),
+    sa.Column('key_hash', sa.Text(), nullable=False),
     sa.Column('key_prefix', sa.String(length=32), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('revoked_at', sa.DateTime(timezone=True), nullable=True),
@@ -56,6 +56,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('key_hash')
     )
     op.create_index(op.f('ix_api_keys_application_id'), 'api_keys', ['application_id'], unique=False)
+    op.create_index(op.f('ix_api_keys_prefix'), 'api_keys', ['key_prefix'], unique=False)
     op.create_table('audit_logs',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('application_id', sa.Uuid(), nullable=False),
@@ -190,6 +191,7 @@ def downgrade() -> None:
     op.drop_index('ix_audit_logs_app_created', table_name='audit_logs')
     op.drop_table('audit_logs')
     op.drop_index(op.f('ix_api_keys_application_id'), table_name='api_keys')
+    op.drop_index(op.f('ix_api_keys_prefix'), table_name='api_keys')
     op.drop_table('api_keys')
     op.drop_index('ix_outbox_events_status_created', table_name='outbox_events')
     op.drop_table('outbox_events')
