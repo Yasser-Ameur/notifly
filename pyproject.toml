@@ -54,6 +54,7 @@ packages = ["src/notifly"]
 target-version = "py313"
 line-length = 100
 src = ["src", "tests", "sdk/src", "sdk/tests"]
+extend-exclude = ["alembic/versions"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "C4", "ASYNC", "RUF"]

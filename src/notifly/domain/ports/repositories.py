@@ -167,16 +167,35 @@ class IdempotencyRepository(Protocol):
 
 
 class UnitOfWork(Protocol):
-    applications: ApplicationRepository
-    api_keys: ApiKeyRepository
-    channels: ChannelRepository
-    templates: TemplateRepository
-    notifications: NotificationRepository
-    deliveries: DeliveryRepository
-    delivery_attempts: DeliveryAttemptRepository
-    audit: AuditRepository
-    outbox: OutboxRepository
-    idempotency: IdempotencyRepository
+    @property
+    def applications(self) -> ApplicationRepository: ...
+
+    @property
+    def api_keys(self) -> ApiKeyRepository: ...
+
+    @property
+    def channels(self) -> ChannelRepository: ...
+
+    @property
+    def templates(self) -> TemplateRepository: ...
+
+    @property
+    def notifications(self) -> NotificationRepository: ...
+
+    @property
+    def deliveries(self) -> DeliveryRepository: ...
+
+    @property
+    def delivery_attempts(self) -> DeliveryAttemptRepository: ...
+
+    @property
+    def audit(self) -> AuditRepository: ...
+
+    @property
+    def outbox(self) -> OutboxRepository: ...
+
+    @property
+    def idempotency(self) -> IdempotencyRepository: ...
 
     async def commit(self) -> None: ...
 
