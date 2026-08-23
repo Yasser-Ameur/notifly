@@ -31,3 +31,7 @@ Thumbs.db
 # Local databases
 *.db
 *.sqlite3
+
+# Worker logs
+worker.err.log
+worker.out.log
