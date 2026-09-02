@@ -3,7 +3,7 @@
 [![CI](https://github.com/Yasser-Ameur/notifly/actions/workflows/ci.yml/badge.svg)](https://github.com/Yasser-Ameur/notifly/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**NotiFly** is a production-grade, channel-agnostic **notification orchestration platform**.
+**NotiFly** is a channel-agnostic **notification orchestration platform**.
 
 It is **not** an email sender. It is a platform that orchestrates multiple delivery channels
 (Email, Slack, Discord, Microsoft Teams, and generic Webhooks) through a single, clean REST API —
