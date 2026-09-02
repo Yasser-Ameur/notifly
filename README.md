@@ -1,6 +1,6 @@
 # NotiFly
 
-[![CI](https://github.com/anomalyco/notifly/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/notifly/actions/workflows/ci.yml)
+[![CI](https://github.com/Yasser-Ameur/notifly/actions/workflows/ci.yml/badge.svg)](https://github.com/Yasser-Ameur/notifly/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **NotiFly** is a production-grade, channel-agnostic **notification orchestration platform**.
